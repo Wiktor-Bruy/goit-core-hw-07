@@ -22,10 +22,11 @@ def input_error(func):
         except IndexError:
             return "Invalid command. Use the 'help' command to get valid commands."
         except KeyError:
-            return "Contact not found"
+            return "Contact not found."
+        except AttributeError:
+            return "Contact not found."
         except Exception as e:
-            return f"{e}"
-            #return "Invalid command. Use the 'help' command to get valid commands."
+            return f"Error: {e}"
 
     return inner
 
@@ -59,8 +60,8 @@ def change_contact(args: list, contacts: AddressBook):
     if len(old_p) != 10 or not old_p.isdigit():
         raise ValueError("Invalid old number. The number must be 10 digits long.")
     recorrd = contacts.find(name)
-    if not recorrd:
-        return "Contact not found"
+    #if not recorrd:
+        #return "Contact not found"
     recorrd.edit_phone(old_p, new_p)
     return "Contact changed"
     
@@ -70,8 +71,8 @@ def get_phone(args: list, contacts: AddressBook):
         raise ValueError("Must be a name.")
     name = args[0]
     record = contacts.find(name)
-    if not record:
-        return "Contact not found"
+    #if not record:
+        #return "Contact not found"
     str_phones = []
     for phone in record.phones:
         str_phones.append(str(phone))
@@ -110,8 +111,6 @@ def show_birthday(args, book: AddressBook):
         return "Must be a name."
     name = args[0]
     record = book.find(name)
-    if not record:
-        return "Contact not found"
     if not record.birthday:
         return "This contact does not have a birthday listed."
     return f"Name: {name}, Birthday: {str(record.birthday)}"

@@ -1,9 +1,16 @@
 from collections import UserDict
 from datetime import datetime
 from datetime import datetime, timedelta
+import re
 
 def date_to_str(date: datetime):
     return date.strftime("%d.%m.%Y")
+
+def str_to_date(date: str):
+    try:
+        return datetime.strptime(date, "%d.%m.%Y").date()
+    except:
+        raise ValueError("Invalid format date in contacts.")
 
 def find_next_weekday(start_date, weekday):
     days_ahead = weekday - start_date.weekday()
@@ -29,14 +36,21 @@ class Phone(Field):
         super().__init__(value)
 
 class Birthday(Field):
-    def __init__(self, value):
-        try:
-            self.date = datetime.strptime(value, "%d.%m.%Y").date()
-        except ValueError:
+    def __init__(self, value: str):
+        is_valid = re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", value)
+        if not is_valid:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
+        day, mounth, year = value.split(".")
+        if not 0 < int(day) <=31:
+            raise ValueError("Day must be 1 - 31.")
+        if not 0 < int(mounth) <=12:
+            raise ValueError("Day must be 1 - 12.")
+        if int(year) > datetime.today().year:
+            raise ValueError("The date cannot be in the future.")
+        self.value = value
 
     def __str__(self):
-        return self.date.strftime("%d.%m.%Y")
+        return self.value
 
 class Record:
     def __init__(self, name):
@@ -64,8 +78,8 @@ class Record:
                 return el
         return None
 
-    def add_birthday(self, value):
-        self.birthday = Birthday(value)
+    def add_birthday(self, value: str):
+        self.birthday = Birthday(value.strip())
 
     def __str__(self):
         if self.birthday:
@@ -87,19 +101,22 @@ class AddressBook(UserDict):
         self.data.pop(name)
 
     def get_upcoming_birthdays(self):
-        user_list = []
-        res_list = []
-        today = datetime.today().date()
+        current_list = []
         for user in self.data:
             if self.data[user].birthday:
-                user_list.append({"name": user, "birthday": self.data[user].birthday.date.replace(year = today.year)})
-                
-        if len(user_list) < 1:
-            return user_list
-        
-        for user in user_list:
+                current_list.append({"name": user, "birthday": str_to_date(self.data[user].birthday.value)})
+
+        if len(current_list) < 1:
+            return current_list
+
+        res_list = []
+        today = datetime.today().date()
+        for user in current_list:
+            user["birthday"] = user["birthday"].replace(year = today.year)
+
+        for user in current_list:
             if user["birthday"] < today:
-                user["birthday"].replace(year = today.year + 1)
+                user["birthday"] = user["birthday"].replace(year = today.year + 1)
             if 0 <= (user["birthday"] - today).days <= 7:
                 if user["birthday"].weekday() >= 5:
                     user["birthday"] = find_next_weekday(user["birthday"], 0)
