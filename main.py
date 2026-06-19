@@ -60,8 +60,6 @@ def change_contact(args: list, contacts: AddressBook):
     if len(old_p) != 10 or not old_p.isdigit():
         raise ValueError("Invalid old number. The number must be 10 digits long.")
     recorrd = contacts.find(name)
-    #if not recorrd:
-        #return "Contact not found"
     recorrd.edit_phone(old_p, new_p)
     return "Contact changed"
     
@@ -71,8 +69,6 @@ def get_phone(args: list, contacts: AddressBook):
         raise ValueError("Must be a name.")
     name = args[0]
     record = contacts.find(name)
-    #if not record:
-        #return "Contact not found"
     str_phones = []
     for phone in record.phones:
         str_phones.append(str(phone))

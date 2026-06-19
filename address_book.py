@@ -40,13 +40,13 @@ class Birthday(Field):
         is_valid = re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", value)
         if not is_valid:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
-        day, mounth, year = value.split(".")
-        if not 0 < int(day) <=31:
-            raise ValueError("Day must be 1 - 31.")
-        if not 0 < int(mounth) <=12:
-            raise ValueError("Day must be 1 - 12.")
+        day, month, year = value.split(".")
         if int(year) > datetime.today().year:
             raise ValueError("The date cannot be in the future.")
+        try:
+            datetime(year, month, day)
+        except:
+            raise ValueError("Invalid month or day.")
         self.value = value
 
     def __str__(self):
